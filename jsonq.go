@@ -243,6 +243,16 @@ func (j *JSONQ) WhereNil(key string) *JSONQ {
 	return j.Where(key, operatorEq, nil)
 }
 
+// WhereKeyIn is an alias of Where(".", "keyIn", "myProp")
+func (j *JSONQ) WhereKeyIn(key string) *JSONQ {
+	return j.Where(".", operatorHasKey, key)
+}
+
+// WhereKeyIn is an alias of Where(".", "keyNotIn", "myProp")
+func (j *JSONQ) WhereKeyNotIn(key string) *JSONQ {
+	return j.Where(".", operatorNotHasKey, key)
+}
+
 // WhereNotNil is an alias of Where("key", "!=", nil)
 func (j *JSONQ) WhereNotNil(key string) *JSONQ {
 	return j.Where(key, operatorNotEq, nil)
@@ -329,7 +339,13 @@ func (j *JSONQ) findInMap(vm map[string]interface{}) []interface{} {
 				j.addError(fmt.Errorf("invalid operator %s", q.operator))
 				return result
 			}
-			nv, errnv := getNestedValue(vm, q.key, j.option.separator)
+			var nv interface{}
+			var errnv error
+			if q.key == j.option.separator {
+				nv = vm
+			} else {
+				nv, errnv = getNestedValue(vm, q.key, j.option.separator)
+			}
 			if errnv != nil {
 				j.addError(errnv)
 				andPassed = false

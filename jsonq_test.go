@@ -461,6 +461,66 @@ func TestJSONQ_WhereNil(t *testing.T) {
 	assertJSON(t, out, expected)
 }
 
+func TestJSONQ_WhereKeyIn(t *testing.T) {
+	jsonObjectList := `
+	{
+		"vendors": {
+			"items": [
+				{"id": 1, "name": "item 1"},
+				{"name": "item 2"},
+				{"id": 3, "name": "item 3"}
+			]
+		}
+	}
+	`
+	jq := New().FromString(jsonObjectList).
+		From("vendors.items").
+		WhereKeyIn("id")
+	expected := `[{"id":1,"name":"item 1"},{"id":3,"name":"item 3"}]`
+	out := jq.Get()
+	assertJSON(t, out, expected)
+}
+
+func TestJSONQ_WhereKeyNotIn(t *testing.T) {
+	jsonObjectList := `
+	{
+		"vendors": {
+			"items": [
+				{"id": 1, "name": "item 1"},
+				{"name": "item 2"},
+				{"id": 3, "name": "item 3"}
+			]
+		}
+	}
+	`
+	jq := New().FromString(jsonObjectList).
+		From("vendors.items").
+		WhereKeyNotIn("id")
+	expected := `[{"name":"item 2"}]`
+	out := jq.Get()
+	assertJSON(t, out, expected)
+}
+
+func TestJSONQ_Where_using_key_in(t *testing.T) {
+	jsonObjectList := `
+	{
+		"vendors": {
+			"items": [
+				{"id": 1, "name": "item 1"},
+				{"name": "item 2"},
+				{"id": 3, "name": "item 3"}
+			]
+		}
+	}
+	`
+	jq := New().FromString(jsonObjectList).
+		From("vendors.items").
+		Where(".", "keyNotIn", "id")
+	expected := `[{"name":"item 2"}]`
+	out := jq.Get()
+	assertJSON(t, out, expected)
+}
+
 func TestJSONQ_WhereNotNil(t *testing.T) {
 	jq := New().FromString(jsonStr).
 		From("vendor.items").
@@ -661,7 +721,7 @@ func TestJSONQ_SortBy_float_ascending_order(t *testing.T) {
 	jq := New().FromString(jsonStr).
 		From("vendor.items").
 		SortBy("price")
-	expected := `[{"id":null,"name":"HP core i3 SSD","price":850},{"id":4,"name":"Fujitsu","price":850},{"id":5,"key":2300,"name":"HP core i5","price":850},{"id":6,"name":"HP core i7","price":950},{"id":3,"name":"Sony VAIO","price":1200},{"id":1,"name":"MacBook Pro 13 inch retina","price":1350},{"id":2,"name":"MacBook Pro 15 inch retina","price":1700}]`
+	expected := `[{"id":4,"name":"Fujitsu","price":850},{"id":5,"key":2300,"name":"HP core i5","price":850},{"id":null,"name":"HP core i3 SSD","price":850},{"id":6,"name":"HP core i7","price":950},{"id":3,"name":"Sony VAIO","price":1200},{"id":1,"name":"MacBook Pro 13 inch retina","price":1350},{"id":2,"name":"MacBook Pro 15 inch retina","price":1700}]`
 	out := jq.Get()
 	assertJSON(t, out, expected, "sorting array of object by its key (price-float64) in ascending desc")
 }

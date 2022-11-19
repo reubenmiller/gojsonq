@@ -7,6 +7,8 @@ import (
 )
 
 const (
+	operatorHasKey         = "keyIn"
+	operatorNotHasKey      = "keyNotIn"
 	operatorEq             = "="
 	operatorEqEng          = "eq"
 	operatorNotEq          = "!="
@@ -36,6 +38,8 @@ const (
 
 func defaultQueries() map[string]QueryFunc {
 	return map[string]QueryFunc{
+		operatorHasKey:         hasKey,
+		operatorNotHasKey:      notHasKey,
 		operatorEq:             eq,
 		operatorEqEng:          eq,
 		operatorNotEq:          neq,
@@ -66,6 +70,35 @@ func defaultQueries() map[string]QueryFunc {
 
 // QueryFunc describes a conditional function which perform comparison
 type QueryFunc func(x, y interface{}) (bool, error)
+
+// hasKye check whether the key x is in y
+func hasKey(x, y interface{}) (bool, error) {
+	if _, ok := y.(string); !ok {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	if xv, ok := x.(map[string]interface{}); ok {
+		if _, ok := xv[y.(string)]; ok {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func notHasKey(x, y interface{}) (bool, error) {
+	if _, ok := y.(string); !ok {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	if xv, ok := x.(map[string]interface{}); ok {
+		if _, ok := xv[y.(string)]; ok {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
 
 // eq checks whether x, y are deeply eq
 func eq(x, y interface{}) (bool, error) {

@@ -791,7 +791,7 @@ func Test_lenLte(t *testing.T) {
 }
 
 func Test_loadDefaultQueryMap(t *testing.T) {
-	if len(defaultQueries()) != 25 {
+	if len(defaultQueries()) != 27 {
 		t.Error("mismatched default query map size")
 	}
 }
